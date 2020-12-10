@@ -49,7 +49,7 @@ image_index = imagelist.index(image)
 if st.button("Find similar Images!"):
     st.balloons()
     knn_distances, knn_indices = knn(np.array([vectors[image_index, :]]), vectors, 5)
-    "## Similar images we found :fire:"
+    "## Similar Images we found :fire:"
     for knn_index in knn_indices[0, 1:]:
         st.image(imagelist[knn_index], use_column_width=True)
 # %%
