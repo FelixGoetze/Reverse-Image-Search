@@ -8,7 +8,7 @@ from faiss.contrib.exhaustive_search import knn
 import glob
 
 # %load_ext autotime # measure time for each cell
-input_path = "../images/UnsplashHouseCollections"
+input_path = "images/UnsplashHouseCollections"
 
 st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="collapsed")
 
