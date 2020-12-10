@@ -2,5 +2,4 @@ numpy==1.19.4
 img2vec_pytorch==0.2.5
 faiss_cpu==1.6.5
 streamlit==0.72.0
-faiss==1.5.3
 Pillow==8.0.1
