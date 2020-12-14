@@ -1,6 +1,8 @@
 from img2vec_pytorch import Img2Vec
+from PIL import Image
 import glob
 import json
+import numpy as np
 
 input_path = "images/UnsplashHouseCollections"
 
