@@ -1,36 +1,14 @@
 # %% Import
 import streamlit as st
-from img2vec_pytorch import Img2Vec
 from PIL import Image
 import numpy as np
 import json
 from faiss.contrib.exhaustive_search import knn
-import glob
 
 # %load_ext autotime # measure time for each cell
-input_path = "images/UnsplashHouseCollections"
 
 st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="collapsed")
 
-# %% Rebuild vectors and imagelist and write to disk
-def rebuild_vectors(input_path):
-    img2vec = Img2Vec(cuda=False)
-    imagelist = glob.glob(input_path + "/" + "*.jpg")
-    vectors = np.ones((len(imagelist), 512))
-    for index, filename in enumerate(imagelist):
-        img = Image.open(filename)
-        vector = img2vec.get_vec(img)
-        # vectors[index, :] = np.ones((1, 512)) # for dry run
-        vectors[index, :] = vector
-    with open("pictures.json", "w") as filehandle:
-        json.dump(imagelist, filehandle)
-    vectors = vectors.astype("float32")
-    np.save("vectors.npy", vectors)
-    return
-
-
-if st.sidebar.button("Rebuild Index from folder"):
-    rebuild_vectors(input_path)
 # %% Read data from disk
 "# Reverse image search demo"
 with open("pictures.json", "r") as filehandle:
