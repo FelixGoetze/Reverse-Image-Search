@@ -2,4 +2,3 @@ img2vec_pytorch==0.2.5
 faiss_cpu==1.6.5
 streamlit==0.72.0
 Pillow==8.0.1
-test
