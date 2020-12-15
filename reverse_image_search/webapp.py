@@ -18,18 +18,29 @@ with open("data/pictures.json", "r") as filehandle:
     imagelist = json.load(filehandle)
 vectors = np.load("data/vectors.npy")
 # %% Select Image to Show
-image = st.selectbox("Select an image", imagelist)
+image_id = st.selectbox("Select an image", imagelist)
+image = "https://source.unsplash.com/" + image_id
 uploaded_file = st.file_uploader("Or Upload an image", type=["jpg", "jpeg"])
+caption = "[View on Unsplash](https://unsplash.com/photos/" + image_id + ")"
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
+    caption = "Your Image"
 "## Your Image :rocket:"
 st.image(image, use_column_width=True)
-image_index = imagelist.index(image)
+st.write(caption)
+image_index = imagelist.index(image_id)
 
 # %% Show similar images using knn
 if st.button("Find similar Images!"):
     knn_distances, knn_indices = knn(np.array([vectors[image_index, :]]), vectors, 5)
     "## Similar Images we found :fire:"
     for knn_index in knn_indices[0, 1:]:
-        st.image(imagelist[knn_index], use_column_width=True)
+        st.image(
+            "https://source.unsplash.com/" + imagelist[knn_index], use_column_width=True
+        )
+        st.write(
+            "[View on Unsplash](https://unsplash.com/photos/"
+            + imagelist[knn_index]
+            + ")"
+        )
 # %%
