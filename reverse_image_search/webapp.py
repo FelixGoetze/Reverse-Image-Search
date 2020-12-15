@@ -11,9 +11,9 @@ st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="col
 
 # %% Read data from disk
 "# Reverse image search demo"
-with open("pictures.json", "r") as filehandle:
+with open("data/pictures.json", "r") as filehandle:
     imagelist = json.load(filehandle)
-vectors = np.load("vectors.npy")
+vectors = np.load("data/vectors.npy")
 # %% Select Image to Show
 image = st.selectbox("Select an image", imagelist)
 uploaded_file = st.file_uploader("Or Upload an image", type=["jpg", "jpeg"])

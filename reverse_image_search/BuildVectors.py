@@ -4,7 +4,7 @@ import glob
 import json
 import numpy as np
 
-input_path = "images/UnsplashHouseCollections"
+input_path = "images/APIdataset"
 
 # %% Rebuild vectors and imagelist and write to disk
 def rebuild_vectors(input_path):
@@ -16,8 +16,8 @@ def rebuild_vectors(input_path):
         vector = img2vec.get_vec(img)
         # vectors[index, :] = np.ones((1, 512)) # for dry run
         vectors[index, :] = vector
-    with open("pictures.json", "w") as filehandle:
+    with open("data/pictures.json", "w") as filehandle:
         json.dump(imagelist, filehandle)
     vectors = vectors.astype("float32")
-    np.save("vectors.npy", vectors)
+    np.save("data/vectors.npy", vectors)
     return
