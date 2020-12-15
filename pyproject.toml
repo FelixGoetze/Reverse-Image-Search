@@ -9,6 +9,7 @@ faiss-cpu = "^1.6.5"
 img2vec-pytorch = "^0.2.5"
 python = "^3.7"
 streamlit = "^0.72.0"
+pygit2 = "^1.4.0"
 
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"

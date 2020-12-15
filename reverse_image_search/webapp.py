@@ -4,13 +4,16 @@ from PIL import Image
 import numpy as np
 import json
 from faiss.contrib.exhaustive_search import knn
+import glob
+from pygit2 import Repository
+
 
 # %load_ext autotime # measure time for each cell
 
 st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="collapsed")
 
 # %% Read data from disk
-"# Reverse image search demo"
+st.write("# Reverse image search demo on [" + Repository(".").head.shorthand + "]")
 with open("data/pictures.json", "r") as filehandle:
     imagelist = json.load(filehandle)
 vectors = np.load("data/vectors.npy")
