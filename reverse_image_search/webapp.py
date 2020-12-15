@@ -7,10 +7,14 @@ from faiss.contrib.exhaustive_search import knn
 from pygit2 import Repository
 from img2vec_pytorch import Img2Vec
 import os
+from sys import platform
 
+# Fixes Openmp bug when computing vector for uploaed image on MacOs
+if platform == "darwin":
+    os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
 
 # %load_ext autotime # measure time for each cell
-# os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
+
 st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="collapsed")
 
 # %% Read data from disk
@@ -26,14 +30,11 @@ uploaded_file = st.file_uploader("Or Upload an image", type=["jpg", "jpeg"])
 caption = "[View on Unsplash](https://unsplash.com/photos/" + image_id + ")"
 image_index = imagelist.index(image_id)
 image_vector = np.array([vectors[image_index, :]])
-print(image_vector.shape)
 if uploaded_file is not None:
     img2vec = Img2Vec(cuda=False)
     image = Image.open(uploaded_file)
     caption = "Your Image"
     image_vector = np.array([img2vec.get_vec(image)])
-    print(image_vector.shape)
-    st.write(image_vector)
 "## Your Image :rocket:"
 st.image(image, use_column_width=True)
 st.write(caption)
