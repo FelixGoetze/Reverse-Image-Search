@@ -6,6 +6,8 @@ import numpy as np
 import json
 from faiss.contrib.exhaustive_search import knn
 import glob
+from pygit2 import Repository
+
 
 # %load_ext autotime # measure time for each cell
 input_path = "images/UnsplashHouseCollections"
@@ -32,7 +34,7 @@ def rebuild_vectors(input_path):
 if st.sidebar.button("Rebuild Index from folder"):
     rebuild_vectors(input_path)
 # %% Read data from disk
-"# Reverse image search demo"
+st.write("# Reverse image search demo on [" + Repository(".").head.shorthand + "]")
 with open("pictures.json", "r") as filehandle:
     imagelist = json.load(filehandle)
 vectors = np.load("vectors.npy")
