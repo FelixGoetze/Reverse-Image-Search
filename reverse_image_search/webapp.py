@@ -8,6 +8,7 @@ from pygit2 import Repository
 from img2vec_pytorch import Img2Vec
 import os
 from sys import platform
+import pickle
 
 # Fixes Openmp bug when computing vector for uploaed image on MacOs
 if platform == "darwin":
@@ -20,9 +21,10 @@ st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="col
 # %% Read data from disk
 st.write("# Reverse image search demo on [" + Repository(".").head.shorthand + "]")
 st.write("View source on [Github](https://github.com/FelixGoetze/Reverse-Image-Search)")
-with open("data/pictures.json", "r") as filehandle:
-    imagelist = list(json.load(filehandle))
-vectors = np.load("data/vectors.npy")
+with open("data/images2.pickle", "rb") as filehandle:
+    imagedict = pickle.load(filehandle)
+imagelist = list(imagedict.keys())
+vectors = np.load("data/vectors2.npy")
 # %% Select Image to Show
 image_id = st.selectbox("Select an image", imagelist)
 image = "https://source.unsplash.com/" + image_id

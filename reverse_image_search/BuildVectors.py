@@ -6,10 +6,10 @@ import numpy as np
 import os
 import pickle
 from tqdm import tqdm
-import time
 
 input_path = "images/UnsplashAPIdataset/"
 img2vec = Img2Vec(cuda=False)
+rebuild_vectors = False
 
 # %%
 def compute_vector(image_key):
@@ -18,7 +18,7 @@ def compute_vector(image_key):
     return vector
 
 
-def save_vectors():
+def save_vectors(vectors, imagedict):
     with open("data/images2.pickle", "wb") as filehandle:
         pickle.dump(imagedict, filehandle, protocol=pickle.HIGHEST_PROTOCOL)
     vectors = vectors.astype("float32")
@@ -26,24 +26,38 @@ def save_vectors():
 
 
 # %% Rebuild vectors and imagelist and write to disk
-def build_vectors(input_path="images/UnsplashAPIdataset/"):
+def build_vectors(input_path="images/UnsplashAPIdataset/", rebuild_vectors=False):
     # %%
-    # load all jpgs from as imagedict_jpgs
-    imagedict = {}
+    # load images dict from folder
     imagedict_jpgs = {
         os.path.basename(x).split(".")[0]: None for x in glob.glob(input_path + "*.jpg")
     }
-    vectors = np.ones((len(imagedict_jpgs), 512))
-    try:
-        for index, key in enumerate(tqdm(imagedict_jpgs)):
-            vectors[index, :] = compute_vector(key)
+    # preallocate array
+    vectors = np.empty((0, 512), float)
+    imagedict = {}
+    imageids = set()
+    if rebuild_vectors:
+        imageids = set(imagedict_jpgs.keys())
+    if not rebuild_vectors:
+        vectors = np.load("data/vectors2.npy")
+        with open("data/images2.pickle", "rb") as filehandle:
+            imagedict = pickle.load(filehandle)
+        imageids = set(imagedict_jpgs.keys()) - set(imagedict.keys())
+
+    for key in tqdm(imageids):
+        try:
+            vectors = np.append(
+                vectors, [compute_vector(key)], axis=0
+            )  # try list, then convert.
             imagedict[key] = None
-    except KeyboardInterrupt:
-        save_vectors
-    save_vectors
+        except:
+            print("error:" + key)
+            save_vectors(vectors, imagedict)
+    save_vectors(vectors, imagedict)
+    # save_vectors(vectors, imagedict)
     # %%
     return
 
 
 # %%
-build_vectors(input_path)
+build_vectors(input_path, rebuild_vectors=False)
