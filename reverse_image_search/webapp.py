@@ -21,7 +21,7 @@ st.set_page_config(page_title="Reverse Image Search", initial_sidebar_state="col
 st.write("# Reverse image search demo on [" + Repository(".").head.shorthand + "]")
 st.write("View source on [Github](https://github.com/FelixGoetze/Reverse-Image-Search)")
 with open("data/pictures.json", "r") as filehandle:
-    imagelist = json.load(filehandle)
+    imagelist = list(json.load(filehandle))
 vectors = np.load("data/vectors.npy")
 # %% Select Image to Show
 image_id = st.selectbox("Select an image", imagelist)
