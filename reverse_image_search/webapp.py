@@ -43,7 +43,9 @@ st.write(caption)
 
 
 # %% Show similar images using knn
-if st.button("Find similar Images!"):
+if st.button(
+    "Find similar Images among " + str(len(imagelist)) + " free Unsplash images"
+):
     knn_distances, knn_indices = knn(image_vector, vectors, 5)
     "## Similar Images we found :fire:"
     for knn_index in knn_indices[0, 1:]:
