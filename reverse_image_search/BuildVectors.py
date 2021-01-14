@@ -2,31 +2,62 @@
 from img2vec_pytorch import Img2Vec
 from PIL import Image
 import glob
-import json
 import numpy as np
 import os
+import pickle
+from tqdm import tqdm
 
 input_path = "images/UnsplashAPIdataset/"
+img2vec = Img2Vec(cuda=False)
+rebuild_vectors = False
+
+# %%
+def compute_vector(image_key):
+    img = Image.open(input_path + image_key + ".jpg")
+    vector = img2vec.get_vec(img)
+    return vector
+
+
+def save_vectors(vectors, imagedict):
+    with open("data/images2.pickle", "wb") as filehandle:
+        pickle.dump(imagedict, filehandle, protocol=pickle.HIGHEST_PROTOCOL)
+    vectors = vectors.astype("float32")
+    np.save("data/vectors2.npy", vectors)
+
 
 # %% Rebuild vectors and imagelist and write to disk
-def rebuild_vectors(input_path):
-    img2vec = Img2Vec(cuda=False)
-    imagelist = [
-        os.path.basename(x).split(".")[0] for x in glob.glob(input_path + "*.jpg")
-    ]
-    vectors = np.ones((len(imagelist), 512))
-    for index, filename in enumerate(imagelist):
-        img = Image.open(input_path + filename + ".jpg")  # dry run
-        vector = img2vec.get_vec(img)  # dry run
-        # vector = np.ones((1, 512))  # dry run
-        vectors[index, :] = vector
-    with open("data/pictures.json", "w") as filehandle:
-        json.dump(imagelist, filehandle)
-    vectors = vectors.astype("float32")
-    np.save("data/vectors.npy", vectors)
+def build_vectors(input_path="images/UnsplashAPIdataset/", rebuild_vectors=False):
+    # %%
+    # load images dict from folder
+    imagedict_jpgs = {
+        os.path.basename(x).split(".")[0]: None for x in glob.glob(input_path + "*.jpg")
+    }
+    # preallocate array
+    vectors = np.empty((0, 512), float)
+    imagedict = {}
+    imageids = set()
+    if rebuild_vectors:
+        imageids = set(imagedict_jpgs.keys())
+    if not rebuild_vectors:
+        vectors = np.load("data/vectors2.npy")
+        with open("data/images2.pickle", "rb") as filehandle:
+            imagedict = pickle.load(filehandle)
+        imageids = set(imagedict_jpgs.keys()) - set(imagedict.keys())
+
+    for key in tqdm(imageids):
+        try:
+            vectors = np.append(
+                vectors, [compute_vector(key)], axis=0
+            )  # try list, then convert.
+            imagedict[key] = None
+        except:
+            print("error:" + key)
+            save_vectors(vectors, imagedict)
+    save_vectors(vectors, imagedict)
+    # save_vectors(vectors, imagedict)
+    # %%
     return
 
 
 # %%
-rebuild_vectors(input_path)
-# %%
+build_vectors(input_path, rebuild_vectors=False)
