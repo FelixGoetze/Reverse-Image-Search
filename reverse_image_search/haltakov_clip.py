@@ -29,7 +29,7 @@ def encode_search_query(search_query):
     return text_encoded.cpu().numpy()
 
 
-# %% KNN 
+# %% KNN
 def find_best_matches(text_features, photo_features, photo_ids, results_count=3):
     knn_distances = (photo_features @ text_features.T).squeeze(1)
     knn_indices = (-knn_distances).argsort()
@@ -59,7 +59,6 @@ def search_unsplash(search_query, photo_features, photo_ids, results_count=3):
 
 
 # %% GUI
-%%time
 st.write("# Search 2 Million Unsplash Images using natural language")
 search_query = st.text_input("Describe the desired Image", value="yawning cat on couch")
 search_unsplash(search_query, photo_features, photo_ids, 3)
