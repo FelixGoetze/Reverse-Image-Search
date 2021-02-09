@@ -1,21 +1,20 @@
 # %% import
 import torch
-from reverse_image_search.CLIP import clip
+import clip
 from PIL import Image
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, transform = clip.load("ViT-B/32", device=device)
 
 # %% Load Data
-image = (
-    transform(Image.open("reverse_image_search/CLIP/CLIP.png")).unsqueeze(0).to(device)
-)
+image = transform(Image.open("reverse_image_search/CLIP.png")).unsqueeze(0).to(device)
 text = clip.tokenize(["a diagram", "a dog", "a cat"]).to(device)
 
 # %% Encode Data
 with torch.no_grad():
     image_features = model.encode_image(image)
     text_features = model.encode_text(text)
+    text_features /= text_features.norm(dim=-1, keepdim=True)
 
 # %% Inference
 with torch.no_grad():
@@ -27,8 +26,5 @@ print("Label probs:", probs)  # prints: [[0.9927937  0.00421068 0.00299572]]
 
 print(torch.pdist(text_features))
 print(torch.cdist(text_features, text_features))
-
-# Distance between embeddings doesn't replace model for text to/from image
 print(torch.cdist(image_features, text_features))
-
 # %%
