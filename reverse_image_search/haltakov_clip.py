@@ -6,7 +6,6 @@ import os
 from sys import platform
 import pandas as pd
 import numpy as np
-from IPython.display import Image
 
 # Fix Openmp bug when computing vector for uploaed image on MacOs
 if platform == "darwin":
@@ -42,7 +41,6 @@ def find_best_matches(text_features, photo_features, photo_ids, results_count=3)
 # %% Display
 def display_photo(photo_id):
     imageurl = "https://source.unsplash.com/" + photo_id
-    # Image(imageurl)
     st.image(imageurl, use_column_width=True)
     st.write("[View on Unsplash](https://unsplash.com/photos/" + photo_id + ")")
 
@@ -59,7 +57,7 @@ def search_unsplash(search_query, photo_features, photo_ids, results_count=3):
 
 
 # %% GUI
+#!%%time
 st.write("# Search 2 Million Unsplash Images using natural language")
 search_query = st.text_input("Describe the desired Image", value="yawning cat on couch")
-search_unsplash(search_query, photo_features, photo_ids, 3)
-# %%
+search_unsplash(search_query, photo_features, photo_ids, 20)

@@ -1,0 +1,165 @@
+<!-- <!DOCTYPE html> -->
+<!-- adapted from https://css-tricks.com/a-lightweight-masonry-solution/ -->
+
+<head>
+  <style>
+    /* basic reset */
+    * {
+      margin: 0;
+    }
+
+    /* masonry grid styles */
+    .grid--masonry {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, min(25em, 100%));
+      grid-template-rows: masonry;
+      justify-content: center;
+      grid-gap: 0.5em;
+      padding: 0.5em;
+    }
+
+    .grid--masonry>* {
+      align-self: start;
+    }
+
+    img {
+      display: block;
+      width: 100%;
+      border-radius: 4px;
+      box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+      /* filter: sepia(1); */
+    }
+  </style>
+</head>
+
+
+<body>
+  <section class='grid--masonry'>
+    
+    <a href="https://unsplash.com/photos/LFPxOuOEi58">
+      <img src="https://source.unsplash.com/LFPxOuOEi58" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/3TV37SnJOdI">
+      <img src="https://source.unsplash.com/3TV37SnJOdI" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/On0MzDRjdBs">
+      <img src="https://source.unsplash.com/On0MzDRjdBs" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/qUTOceib4bw">
+      <img src="https://source.unsplash.com/qUTOceib4bw" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/cRRUb2igDww">
+      <img src="https://source.unsplash.com/cRRUb2igDww" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/qjNHbQfsew4">
+      <img src="https://source.unsplash.com/qjNHbQfsew4" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/a1SdIXeQ8sU">
+      <img src="https://source.unsplash.com/a1SdIXeQ8sU" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/qrB6dHQSlDE">
+      <img src="https://source.unsplash.com/qrB6dHQSlDE" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/DYNgMA96bdw">
+      <img src="https://source.unsplash.com/DYNgMA96bdw" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/gKjfE-71ozY">
+      <img src="https://source.unsplash.com/gKjfE-71ozY" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/70apr3cOvu4">
+      <img src="https://source.unsplash.com/70apr3cOvu4" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/v8vlO5yHSxs">
+      <img src="https://source.unsplash.com/v8vlO5yHSxs" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/AoO-ftwHTo0">
+      <img src="https://source.unsplash.com/AoO-ftwHTo0" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/ZV1AWCAPb44">
+      <img src="https://source.unsplash.com/ZV1AWCAPb44" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/spmu71rei1k">
+      <img src="https://source.unsplash.com/spmu71rei1k" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/0KUr7RQj3Xw">
+      <img src="https://source.unsplash.com/0KUr7RQj3Xw" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/EMs1izg3TTo">
+      <img src="https://source.unsplash.com/EMs1izg3TTo" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/eg76xnKZ3SI">
+      <img src="https://source.unsplash.com/eg76xnKZ3SI" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/DWq020uw5kA">
+      <img src="https://source.unsplash.com/DWq020uw5kA" alt="">
+    </a>
+    
+    <a href="https://unsplash.com/photos/xd2HeN7yy9M">
+      <img src="https://source.unsplash.com/xd2HeN7yy9M" alt="">
+    </a>
+    
+  </section>
+
+  <script>
+    let grids = [...document.querySelectorAll('.grid--masonry')];
+
+    if (grids.length && getComputedStyle(grids[0]).gridTemplateRows !== 'masonry') {
+      grids = grids.map(grid => ({
+        _el: grid,
+        gap: parseFloat(getComputedStyle(grid).gridRowGap),
+        items: [...grid.childNodes].filter(c => c.nodeType === 1),
+        ncol: 0
+      }));
+
+
+      function layout() {
+        grids.forEach(grid => {
+          /* get the post relayout number of columns */
+          let ncol = getComputedStyle(grid._el).gridTemplateColumns.split(' ').length;
+
+          /* if the number of columns has changed */
+          if (grid.ncol !== ncol) {
+            /* update number of columns */
+            grid.ncol = ncol;
+
+            /* revert to initial positioning, no margin */
+            grid.items.forEach(c => c.style.removeProperty('margin-top'));
+
+            /* if we have more than one column */
+            if (grid.ncol > 1) {
+              grid.items.slice(ncol).forEach((c, i) => {
+                let prev_fin = grid.items[i].getBoundingClientRect().bottom /* bottom edge of item above */,
+                  curr_ini = c.getBoundingClientRect().top /* top edge of current item */;
+
+                c.style.marginTop = `${prev_fin + grid.gap - curr_ini}px`;
+              });
+            }
+          }
+        });
+      }
+
+      addEventListener('load', e => {
+        layout(); /* initial load */
+        addEventListener('resize', layout, false); /* on resize */
+      }, false);
+    }
+  </script>
+</body>
