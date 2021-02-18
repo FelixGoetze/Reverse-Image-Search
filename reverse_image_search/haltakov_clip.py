@@ -6,6 +6,7 @@ import os
 from sys import platform
 import pandas as pd
 import numpy as np
+from jinja2 import Environment, FileSystemLoader
 
 # Fix Openmp bug when computing vector for uploaed image on MacOs
 if platform == "darwin":
@@ -13,6 +14,14 @@ if platform == "darwin":
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model, transform = clip.load("ViT-B/32", device=device)
+
+# Jinja Template settings
+root = os.path.dirname(os.path.abspath(__file__))
+templates_dir = os.path.join(root, "templates")
+env = Environment(loader=FileSystemLoader(templates_dir))
+
+st.set_page_config(layout="wide")
+
 
 # %% Load Data
 photo_ids = pd.read_csv("data/photo_ids.csv")
@@ -38,11 +47,25 @@ def find_best_matches(text_features, photo_features, photo_ids, results_count=3)
     return result
 
 
+# %% Render Imagegrid from Template
+def render_from_template(template_filename, best_photo_ids, write_to_disk):
+    template = env.get_template(template_filename)
+    output_file = os.path.join(root, "html", template_filename)
+    html_image_grid = template.render(ids=best_photo_ids)
+    if write_to_disk:
+        with open(output_file, "w") as fh:
+            fh.write(html_image_grid)
+    return html_image_grid
+
+
 # %% Display
-def display_photo(photo_id):
-    imageurl = "https://source.unsplash.com/" + photo_id
-    st.image(imageurl, use_column_width=True)
-    st.write("[View on Unsplash](https://unsplash.com/photos/" + photo_id + ")")
+def display_image_grid(best_photo_ids):
+    html_image_grid = render_from_template(
+        template_filename="index.html",
+        best_photo_ids=best_photo_ids,
+        write_to_disk=False,
+    )
+    st.components.v1.html(html_image_grid, height=5000, scrolling=True)
 
 
 # %% Search
@@ -51,8 +74,8 @@ def search_unsplash(search_query, photo_features, photo_ids, results_count=3):
     best_photo_ids = find_best_matches(
         text_features, photo_features, photo_ids, results_count
     )
-    for photo_id in best_photo_ids:
-        display_photo(photo_id)
+
+    display_image_grid(best_photo_ids)
     return best_photo_ids
 
 
