@@ -17,6 +17,7 @@ torchvision = "^0.8.2"
 tqdm = "^4.56.0"
 watchdog = "^2.0.1"
 
+
 [tool.poetry.dev-dependencies]
 black = "^20.8b1"
 ipython-autotime = "^0.2.0"

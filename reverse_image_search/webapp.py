@@ -35,6 +35,7 @@ def load_data():
     return photo_ids, photo_features
 
 
+
 # %%
 photo_ids, photo_features = load_data()
 
