@@ -1,33 +1,44 @@
-# %%
+# %% Import
 from reverse_image_search.haltakov_clip import *
-
-# %% Index
 import faiss
 
-d = 512
-nlist = 100
-m = 8  # number of subquantizers
-k = 4
-quantizer = faiss.IndexFlatL2(d)  # this remains the same
-index = faiss.IndexIVFPQ(quantizer, d, nlist, m, 8)
-# 8 specifies that each sub-vector is encoded as 8 bits
-index.train(photo_features)
+# %% Create Index
+D = 512
+M = 256  # number of subquantizers
+nbits = 8
+nlist = 1500  # The number of cells (space partition). Typical value is sqrt(N)
+hnsw_m = 32
+quantizer = faiss.IndexHNSWFlat(D, hnsw_m)
+index = faiss.IndexIVFPQ(quantizer, D, nlist, M, nbits)  # this remains the same
+index.train(photo_features[:20000, :])
 index.add(photo_features)
-# %%
-search_query = "yawning cat on couch"
-text_features = encode_search_query(search_query)
-index.nprobe = 10
-# %%
-D, I = index.search(text_features, 50)
-print(photo_ids.iloc[I.tolist()[0]])
-# %%
 faiss.write_index(index, "index.faiss")
 # %%
-from IPython.core.display import display, HTML
 
-display(HTML(r"""<img src="https://source.unsplash.com/hQgxyi8Oduo">"""))
-# %%
-imageurl = "https://source.unsplash.com/" + "hQgxyi8Oduo"
-# %%
+index = faiss.read_index("index.faiss")
 
+# %% Using Index
+#!%%time
+index.nprobe = 200
+search_query = "technical debt"
+text_features = encode_search_query(search_query)
+D, I = index.search(text_features, 10)
+best_photo_ids = photo_ids.iloc[I.tolist()[0]]["photo_id"].to_list()
+display_image_grid(best_photo_ids)
+best_photo_ids
+# %% True Result
+#!%%time
+true_result = search_unsplash(search_query, photo_features, photo_ids, 10)
+# %%
+list(set(true_result) & set(best_photo_ids))
+# %%
+index_from_factory = faiss.index_factory(512, "OPQ64_128,IVF65536_HNSW32,PQ64")
+index_from_factory.train(photo_features[: 30 * 65536, :])
+index_from_factory.add(photo_features)
+faiss.write_index(index_from_factory, "index_from_factory.faiss")
+# %%
+#!%%time
+D, I = index_from_factory.search(text_features, 10)
+best_photo_ids = photo_ids.iloc[I.tolist()[0]]["photo_id"].to_list()
+display_image_grid(best_photo_ids)
 # %%

@@ -1,4 +1,4 @@
-<!-- <!DOCTYPE html> -->
+<!DOCTYPE html>
 <!-- adapted from https://css-tricks.com/a-lightweight-masonry-solution/ -->
 
 <head>
@@ -8,10 +8,30 @@
       margin: 0;
     }
 
+    .day {
+      background: #eee;
+      color: black;
+    }
+
+    .night {
+      background: #333;
+      color: white;
+    }
+
+    html {
+      background: white;
+    }
+
+    /* @media (prefers-color-scheme: dark) {
+      html {
+        background: #555
+      }
+    } */
+
     /* masonry grid styles */
     .grid--masonry {
       display: grid;
-      grid-template-columns: repeat(auto-fit, min(20em, 100%));
+      grid-template-columns: repeat(auto-fit, min(25em, 100%));
       grid-template-rows: masonry;
       justify-content: center;
       grid-gap: 0.5em;
