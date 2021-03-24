@@ -143,9 +143,9 @@ st.write("# Search 2 million Unsplash images")
 
 
 default_inputs = {
-    "text_input": "e.g. 'Two dogs playing during sunset'",
+    "text_input": "e.g. 'modern villa with swimming pool'",
     "file_uploader": None,
-    "selectbox": "<select example>",
+    "selectbox": "Select an example",
     "slider": 0,
 }
 # Get state of the inputs from their defaults
@@ -162,9 +162,11 @@ with expander:
         "Choose from a search query",
         (
             default_inputs["selectbox"],
-            "Two dogs playing in the snow",
-            "yawning cat",
-            "technical debt",
+            "antique bicycle",
+            "oldtimer mercedes",
+            "red couch",
+            "rustic kitchen",
+            "garden with fountain",
         ),
     )
     inputs["slider"] = st.slider(
@@ -172,7 +174,7 @@ with expander:
     )
 
 key = "text_input"
-value = "Two dogs playing during sunset"
+value = "modern villa with swimming pool"
 
 
 # find changed input, update state
