@@ -143,7 +143,7 @@ st.write("# Search 2 million Unsplash images")
 
 
 default_inputs = {
-    "text_input": "<write a query>",
+    "text_input": "e.g. 'Two dogs playing during sunset'",
     "file_uploader": None,
     "selectbox": "<select example>",
     "slider": 0,
@@ -154,7 +154,7 @@ state = SessionState.get(inputs=default_inputs)
 inputs = {}
 inputs["text_input"] = st.text_input("Describe the image", default_inputs["text_input"])
 inputs["file_uploader"] = st.file_uploader(
-    "Upload an image to find similar images", type=["jpg", "jpeg"]
+    "Or upload an image to find similar images", type=["jpg", "jpeg"]
 )
 expander = st.beta_expander("Examples")
 with expander:
@@ -171,42 +171,45 @@ with expander:
         "Or pick an image", 0, photo_features.shape[0], default_inputs["slider"]
     )
 
+key = "text_input"
+value = "Two dogs playing during sunset"
+
 
 # find changed input, update state
 for k, v in inputs.items():
     if v != state.inputs[k]:
+        key = k
+        value = v
         state.inputs[k] = v
         break
 
 
 # do search depending on input type
-if k == "text_input":
+if key == "text_input":
     st.write("## Results")
-    st.write(f"Images matching *'{v}'*")
-    search_unsplash(v, photo_features, photo_ids, 10)
-elif k == "file_uploader":
-    image = open_and_rotate(v)
+    st.write(f"Images matching *'{value}'*")
+    search_unsplash(value, photo_features, photo_ids, 10)
+elif key == "file_uploader":
+    image = open_and_rotate(value)
     image_features = encode_image_query(image)
     st.write("## Results")
     st.write("Images similar to:")
     st.image(image)
     best_photo_ids = find_best_matches(image_features, photo_features, photo_ids, 10)
     display_image_grid(best_photo_ids)
-elif k == "slider":
-    image_vector = np.array([photo_features[v, :]])
+elif key == "slider":
+    image_vector = np.array([photo_features[value, :]])
     best_photo_ids = find_best_matches(
         image_vector, photo_features, photo_ids, 10, True
     )
     st.write("## Results")
     st.write("Images similar to:")
     st.image(
-        "https://source.unsplash.com/" + photo_ids.iloc[v]["photo_id"],
+        "https://source.unsplash.com/" + photo_ids.iloc[value]["photo_id"],
         use_column_width=True,
     )
     display_image_grid(best_photo_ids)
-elif k == "selectbox":
+elif key == "selectbox":
     st.write("## Results")
-    st.write(f"Images matching *'{v}'*")
-    search_unsplash(v, photo_features, photo_ids, 10)
-
-# %%
+    st.write(f"Images matching *'{value}'*")
+    search_unsplash(value, photo_features, photo_ids, 10)
