@@ -6,7 +6,7 @@ import os
 import pandas as pd
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
-from PIL import Image
+from PIL import Image, ExifTags
 import SessionState
 
 st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
@@ -112,6 +112,32 @@ def search_unsplash(search_query, photo_features, photo_ids, results_count=3):
     return best_photo_ids
 
 
+# %%
+def open_and_rotate(v):
+    # https://stackoverflow.com/questions/4228530/pil-thumbnail-is-rotating-my-image/
+    try:
+        image = Image.open(v)
+
+        for orientation in ExifTags.TAGS.keys():
+            if ExifTags.TAGS[orientation] == "Orientation":
+                break
+
+        exif = dict(image._getexif().items())
+
+        if exif[orientation] == 3:
+            image = image.rotate(180, expand=True)
+        elif exif[orientation] == 6:
+            image = image.rotate(270, expand=True)
+        elif exif[orientation] == 8:
+            image = image.rotate(90, expand=True)
+
+        return image
+
+    except (AttributeError, KeyError, IndexError):
+        image = Image.open(v)
+        return image
+
+
 # %% GUI natural language search
 st.write("# Search 2 million Unsplash images")
 
@@ -159,7 +185,7 @@ if k == "text_input":
     st.write(f"Images matching *'{v}'*")
     search_unsplash(v, photo_features, photo_ids, 10)
 elif k == "file_uploader":
-    image = Image.open(v)
+    image = open_and_rotate(v)
     image_features = encode_image_query(image)
     st.write("## Results")
     st.write("Images similar to:")
