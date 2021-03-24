@@ -61,14 +61,20 @@ def encode_image_query(image):
 
 
 # %% KNN
-def find_best_matches(text_features, photo_features, photo_ids, results_count=3):
+def find_best_matches(
+    text_features, photo_features, photo_ids, results_count=3, skip_first=False
+):
     knn_distances = (photo_features @ text_features.T).squeeze(1)
 
-    idx = np.argpartition(knn_distances, -results_count)[-results_count:]
-    knn_indices = idx[np.argsort(knn_distances[idx])][::-1]
+    if skip_first:
+        idx = np.argpartition(knn_distances, -results_count - 1)[-results_count - 1 :]
+        knn_indices = idx[np.argsort(knn_distances[idx])][-2::-1]
+    else:
+        idx = np.argpartition(knn_distances, -results_count)[-results_count:]
+        knn_indices = idx[np.argsort(knn_distances[idx])][::-1]
 
     result = []
-    for knn_index in knn_indices[:results_count]:
+    for knn_index in knn_indices:
         result.append(photo_ids.iloc[knn_index]["photo_id"])
     return result
 
@@ -162,8 +168,9 @@ elif k == "file_uploader":
     display_image_grid(best_photo_ids)
 elif k == "slider":
     image_vector = np.array([photo_features[v, :]])
-    best_photo_ids = find_best_matches(image_vector, photo_features, photo_ids, 10)
-    # TODO Skip one image
+    best_photo_ids = find_best_matches(
+        image_vector, photo_features, photo_ids, 10, True
+    )
     st.write("## Results")
     st.write("Images similar to:")
     st.image(
