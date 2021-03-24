@@ -1,30 +1,31 @@
 # %% Import
 import clip
-from numpy.lib.twodim_base import vander
 import torch
 import streamlit as st
 import os
-from sys import platform
 import pandas as pd
 import numpy as np
 from jinja2 import Environment, FileSystemLoader
 from PIL import Image
 import SessionState
 
+st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
-# Fix Openmp bug when computing vector for uploaed image on MacOs
-if platform == "darwin":
-    os.environ["KMP_DUPLICATE_LIB_OK"] = "True"
+# %%
+@st.cache(allow_output_mutation=True)
+def load_model():
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    model, transform = clip.load("ViT-B/32", device=device)
+    return device, model, transform
 
-device = "cuda" if torch.cuda.is_available() else "cpu"
-model, transform = clip.load("ViT-B/32", device=device)
 
+# %%
+device, model, transform = load_model()
+# %%
 # Jinja Template settings
 root = os.path.dirname(os.path.abspath(__file__))
 templates_dir = os.path.join(root, "templates")
 env = Environment(loader=FileSystemLoader(templates_dir))
-
-st.set_page_config(layout="wide", initial_sidebar_state="collapsed")
 
 
 # %% Load Data
@@ -35,8 +36,8 @@ def load_data():
     return photo_ids, photo_features
 
 
-
 # %%
+
 photo_ids, photo_features = load_data()
 
 # %% Encode Query
@@ -75,9 +76,9 @@ def find_best_matches(text_features, photo_features, photo_ids, results_count=3)
 # %% Render Imagegrid from Template
 def render_from_template(template_filename, best_photo_ids, write_to_disk):
     template = env.get_template(template_filename)
-    output_file = os.path.join(root, "html", template_filename)
     html_image_grid = template.render(ids=best_photo_ids)
     if write_to_disk:
+        output_file = os.path.join(root, "html", template_filename)
         with open(output_file, "w") as fh:
             fh.write(html_image_grid)
     return html_image_grid
@@ -88,7 +89,7 @@ def display_image_grid(best_photo_ids):
     html_image_grid = render_from_template(
         template_filename="index.html",
         best_photo_ids=best_photo_ids,
-        write_to_disk=True,
+        write_to_disk=False,
     )
     # TODO make height adapt to screen size and amoount of images
     st.components.v1.html(html_image_grid, height=10000, scrolling=True)
@@ -119,9 +120,7 @@ default_inputs = {
 state = SessionState.get(inputs=default_inputs)
 
 inputs = {}
-inputs["text_input"] = st.text_input(
-    "Use natural language", default_inputs["text_input"]
-)
+inputs["text_input"] = st.text_input("Describe the image", default_inputs["text_input"])
 inputs["file_uploader"] = st.file_uploader(
     "Upload an image to find similar images", type=["jpg", "jpeg"]
 )
@@ -152,18 +151,18 @@ for k, v in inputs.items():
 if k == "text_input":
     st.write("## Results")
     st.write(f"Images matching *'{v}'*")
-    search_unsplash(v, photo_features, photo_ids, 20)
+    search_unsplash(v, photo_features, photo_ids, 10)
 elif k == "file_uploader":
     image = Image.open(v)
     image_features = encode_image_query(image)
     st.write("## Results")
     st.write("Images similar to:")
     st.image(image)
-    best_photo_ids = find_best_matches(image_features, photo_features, photo_ids, 20)
+    best_photo_ids = find_best_matches(image_features, photo_features, photo_ids, 10)
     display_image_grid(best_photo_ids)
 elif k == "slider":
     image_vector = np.array([photo_features[v, :]])
-    best_photo_ids = find_best_matches(image_vector, photo_features, photo_ids, 20)
+    best_photo_ids = find_best_matches(image_vector, photo_features, photo_ids, 10)
     # TODO Skip one image
     st.write("## Results")
     st.write("Images similar to:")
@@ -175,4 +174,6 @@ elif k == "slider":
 elif k == "selectbox":
     st.write("## Results")
     st.write(f"Images matching *'{v}'*")
-    search_unsplash(v, photo_features, photo_ids, 20)
+    search_unsplash(v, photo_features, photo_ids, 10)
+
+# %%
