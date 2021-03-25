@@ -143,7 +143,7 @@ st.write("# Search 2 million Unsplash images")
 
 
 default_inputs = {
-    "text_input": "e.g. 'modern villa with swimming pool'",
+    "text_input": "e.g. 'Nice lofty apartment with good natural light'",
     "file_uploader": None,
     "selectbox": "Select an example",
     "slider": 0,
@@ -167,6 +167,7 @@ with expander:
             "red couch",
             "rustic kitchen",
             "garden with fountain",
+            "modern villa with a swimming pool",
         ),
     )
     inputs["slider"] = st.slider(
@@ -174,7 +175,7 @@ with expander:
     )
 
 key = "text_input"
-value = "modern villa with swimming pool"
+value = "Nice lofty apartment with good natural light"
 
 
 # find changed input, update state
@@ -185,24 +186,27 @@ for k, v in inputs.items():
         state.inputs[k] = v
         break
 
+result_count = 20
 
 # do search depending on input type
 if key == "text_input":
     st.write("## Results")
     st.write(f"Images matching *'{value}'*")
-    search_unsplash(value, photo_features, photo_ids, 10)
+    search_unsplash(value, photo_features, photo_ids, result_count)
 elif key == "file_uploader":
     image = open_and_rotate(value)
     image_features = encode_image_query(image)
     st.write("## Results")
     st.write("Images similar to:")
     st.image(image)
-    best_photo_ids = find_best_matches(image_features, photo_features, photo_ids, 10)
+    best_photo_ids = find_best_matches(
+        image_features, photo_features, photo_ids, result_count
+    )
     display_image_grid(best_photo_ids)
 elif key == "slider":
     image_vector = np.array([photo_features[value, :]])
     best_photo_ids = find_best_matches(
-        image_vector, photo_features, photo_ids, 10, True
+        image_vector, photo_features, photo_ids, result_count, True
     )
     st.write("## Results")
     st.write("Images similar to:")
@@ -214,4 +218,4 @@ elif key == "slider":
 elif key == "selectbox":
     st.write("## Results")
     st.write(f"Images matching *'{value}'*")
-    search_unsplash(value, photo_features, photo_ids, 10)
+    search_unsplash(value, photo_features, photo_ids, result_count)
